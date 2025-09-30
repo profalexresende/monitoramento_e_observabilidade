@@ -1,4 +1,5 @@
 using HealthChecks.MongoDb;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -24,10 +25,6 @@ builder.Services.AddHealthChecks()
         timeout: TimeSpan.FromSeconds(5),
         tags: new[] { "db", "mongo" }
     );
-
-
-
-
 
 // ------------ OpenTelemetry ------------
 builder.Services.AddOpenTelemetry()
@@ -67,21 +64,7 @@ app.MapControllers();
 // Endpoint de health
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var json = System.Text.Json.JsonSerializer.Serialize(new
-        {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description
-            })
-        });
-        await context.Response.WriteAsync(json);
-    }
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
 app.Run();
