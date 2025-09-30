@@ -15,11 +15,19 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy("API OK"))
     .AddMongoDb(
-    sp => new MongoClient(builder.Configuration["MongoDb:ConnectionString"]),
-    name: "mongodb",
-    timeout: TimeSpan.FromSeconds(5),
-    tags: new[] { "db", "mongo" }
-);
+        sp =>
+        {
+            var cs = builder.Configuration["MongoDb:ConnectionString"];
+            return new MongoClient(cs);
+        },
+        name: "mongodb",
+        timeout: TimeSpan.FromSeconds(5),
+        tags: new[] { "db", "mongo" }
+    );
+
+
+
+
 
 // ------------ OpenTelemetry ------------
 builder.Services.AddOpenTelemetry()
